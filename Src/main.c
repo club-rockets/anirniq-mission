@@ -31,7 +31,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "barometer/barometer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -102,7 +102,8 @@ int main(void)
   MX_CAN1_Init();
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
-
+  barometer_t baro;
+  barometer_init(&baro, ALT_CS_GPIO_Port, ALT_CS_Pin, &hspi2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,7 +111,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    barometer_update(&baro);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
