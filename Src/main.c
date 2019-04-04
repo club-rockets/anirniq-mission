@@ -101,9 +101,11 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CAN1_Init();
   MX_USB_OTG_FS_PCD_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   barometer_t baro;
-  barometer_init(&baro, ALT_CS_GPIO_Port, ALT_CS_Pin, &hspi2);
+  barometer_init(&baro, ALT_CS_SP1_GPIO_Port, ALT_CS_SP1_Pin, &hspi1);
+  uint8_t led = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,8 +113,38 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    barometer_update(&baro);
+
     /* USER CODE BEGIN 3 */
+    barometer_update(&baro);
+    if (baro.pressure < 100000) {
+      if (!led) {
+        led = 0b0001;
+      }
+      else {
+        led = (led << 1);
+        if (led <= 0b1000) {
+          led |= 1;
+        }
+      }
+    }
+    else {
+      if (!led) {
+        led = 0b1000;
+      }
+      else {
+        led = (led >> 1);
+        if ((led & 0b1) == 0) {
+          led |= 0b1000;
+        }
+      }
+    }
+
+    HAL_GPIO_WritePin(LED4_a_GPIO_Port, LED4_a_Pin, (led & 0b1000) != 0);
+    HAL_GPIO_WritePin(LED3_a_GPIO_Port, LED3_a_Pin, (led & 0b0100) != 0);
+    HAL_GPIO_WritePin(LED2_a_GPIO_Port, LED2_a_Pin, (led & 0b0010) != 0);
+    HAL_GPIO_WritePin(LED1_a_GPIO_Port, LED1_a_Pin, (led & 0b0001) != 0);
+
+    HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
