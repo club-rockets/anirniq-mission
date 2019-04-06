@@ -67,8 +67,6 @@ void Error_Handler(void);
 #define FIRE_MAIN_GPIO_Port GPIOE
 #define SENSE_MAIN_Pin GPIO_PIN_5
 #define SENSE_MAIN_GPIO_Port GPIOE
-#define ALT_CS_SP1_Pin GPIO_PIN_4
-#define ALT_CS_SP1_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_14
 #define LED1_GPIO_Port GPIOE
 #define LED2_Pin GPIO_PIN_15
@@ -79,14 +77,6 @@ void Error_Handler(void);
 #define LED4_GPIO_Port GPIOB
 #define ALT_CS_Pin GPIO_PIN_12
 #define ALT_CS_GPIO_Port GPIOB
-#define LED1_a_Pin GPIO_PIN_12
-#define LED1_a_GPIO_Port GPIOD
-#define LED2_a_Pin GPIO_PIN_13
-#define LED2_a_GPIO_Port GPIOD
-#define LED3_a_Pin GPIO_PIN_14
-#define LED3_a_GPIO_Port GPIOD
-#define LED4_a_Pin GPIO_PIN_15
-#define LED4_a_GPIO_Port GPIOD
 #define SD_DETECT_Pin GPIO_PIN_3
 #define SD_DETECT_GPIO_Port GPIOD
 #define CAN1_STANDBY_Pin GPIO_PIN_0

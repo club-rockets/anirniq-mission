@@ -31,7 +31,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "barometer/barometer.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,13 +57,16 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static FATFS sdfs;
+static FIL logfile;
+static uint32_t next_sd_check = 0;
 /* USER CODE END 0 */
 
 /**
@@ -101,11 +104,12 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CAN1_Init();
   MX_USB_OTG_FS_PCD_Init();
-  MX_SPI1_Init();
+
+  /* Initialize interrupts */
+  MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  barometer_t baro;
-  barometer_init(&baro, ALT_CS_SP1_GPIO_Port, ALT_CS_SP1_Pin, &hspi1);
-  uint8_t led = 0;
+
+  uint32_t next_heartbeat = HAL_GetTick() + 100;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -115,36 +119,27 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    barometer_update(&baro);
-    if (baro.pressure < 100000) {
-      if (!led) {
-        led = 0b0001;
+    if (HAL_GetTick() > next_sd_check && !HAL_GPIO_ReadPin(SD_DETECT_GPIO_Port, SD_DETECT_Pin)) {
+      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+
+      if (BSP_SD_Init() == MSD_OK) {
+        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
+        f_mount(&sdfs, (TCHAR const*)SDPath, 1);
+        f_open(&logfile, "mission.log", FA_OPEN_ALWAYS | FA_WRITE);
+        f_lseek(&logfile, f_size(&logfile));
+        f_puts("SD Write successful\n", &logfile);
+        f_close(&logfile);
+        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
       }
-      else {
-        led = (led << 1);
-        if (led <= 0b1000) {
-          led |= 1;
-        }
-      }
+      next_sd_check = next_sd_check + 0xFFFF;
     }
     else {
-      if (!led) {
-        led = 0b1000;
-      }
-      else {
-        led = (led >> 1);
-        if ((led & 0b1) == 0) {
-          led |= 0b1000;
-        }
-      }
+      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
     }
-
-    HAL_GPIO_WritePin(LED4_a_GPIO_Port, LED4_a_Pin, (led & 0b1000) != 0);
-    HAL_GPIO_WritePin(LED3_a_GPIO_Port, LED3_a_Pin, (led & 0b0100) != 0);
-    HAL_GPIO_WritePin(LED2_a_GPIO_Port, LED2_a_Pin, (led & 0b0010) != 0);
-    HAL_GPIO_WritePin(LED1_a_GPIO_Port, LED1_a_Pin, (led & 0b0001) != 0);
-
-    HAL_Delay(100);
+    if (HAL_GetTick() > next_heartbeat) {
+      HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+      next_heartbeat += 100;
+    }
   }
   /* USER CODE END 3 */
 }
@@ -199,7 +194,22 @@ void SystemClock_Config(void)
   }
 }
 
+/**
+  * @brief NVIC Configuration.
+  * @retval None
+  */
+static void MX_NVIC_Init(void)
+{
+  /* EXTI3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+}
+
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  next_sd_check = HAL_GetTick() + 200;
+}
 
 /* USER CODE END 4 */
 
