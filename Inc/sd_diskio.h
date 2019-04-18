@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    sd_diskio.h (based on sd_diskio_template.h v2.0.2)
+  * @file    sd_diskio.h (based on sd_diskio_dma_rtos_template.h v2.0.2)
   * @brief   Header for sd_diskio.c module
   ******************************************************************************
   * @attention

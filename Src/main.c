@@ -20,7 +20,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "can.h"
+#include "dma.h"
 #include "fatfs.h"
 #include "rtc.h"
 #include "sdio.h"
@@ -31,7 +33,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "app_altitude.h"
+#include "app_heartbeat.h"
+#include "app_sd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,16 +61,14 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_NVIC_Init(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static FATFS sdfs;
-static FIL logfile;
-static uint32_t next_sd_check = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -97,20 +99,26 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_RTC_Init();
   MX_SDIO_SD_Init();
-  MX_FATFS_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   MX_CAN1_Init();
   MX_USB_OTG_FS_PCD_Init();
-
-  /* Initialize interrupts */
-  MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-
-  uint32_t next_heartbeat = HAL_GetTick() + 100;
+  app_heartbeat_init();
+  app_altitude_init();
+  app_sd_init();
   /* USER CODE END 2 */
+
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+  
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -119,27 +127,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (HAL_GetTick() > next_sd_check && !HAL_GPIO_ReadPin(SD_DETECT_GPIO_Port, SD_DETECT_Pin)) {
-      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-
-      if (BSP_SD_Init() == MSD_OK) {
-        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
-        f_mount(&sdfs, (TCHAR const*)SDPath, 1);
-        f_open(&logfile, "mission.log", FA_OPEN_ALWAYS | FA_WRITE);
-        f_lseek(&logfile, f_size(&logfile));
-        f_puts("SD Write successful\n", &logfile);
-        f_close(&logfile);
-        HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
-      }
-      next_sd_check = next_sd_check + 0xFFFF;
-    }
-    else {
-      HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-    }
-    if (HAL_GetTick() > next_heartbeat) {
-      HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-      next_heartbeat += 100;
-    }
   }
   /* USER CODE END 3 */
 }
@@ -194,24 +181,35 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief NVIC Configuration.
-  * @retval None
-  */
-static void MX_NVIC_Init(void)
-{
-  /* EXTI3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-}
-
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  next_sd_check = HAL_GetTick() + 200;
+  if (GPIO_Pin == SD_DETECT_Pin) {
+    app_sd_detect_handler();
+  }
 }
-
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
