@@ -42,7 +42,7 @@ void app_sd()
                             break;
                         }
 
-                        f_puts("sd thread write ok", &logfile);
+                        f_puts("sd write success\r\n", &logfile);
                         HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
                         f_close(&logfile);
                         HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
