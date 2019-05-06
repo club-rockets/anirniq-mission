@@ -18,6 +18,8 @@
   */
 /* USER CODE END Header */
 
+/* Note: code generation based on sd_diskio_dma_rtos_template.c v2.1.1 as FreeRTOS is enabled. */
+
 /* USER CODE BEGIN firstSection */
 /* can be used to modify / undefine following code or add new definitions */
 /* USER CODE END firstSection*/
@@ -35,8 +37,6 @@
 #define QUEUE_SIZE         (uint32_t) 10
 #define READ_CPLT_MSG      (uint32_t) 1
 #define WRITE_CPLT_MSG     (uint32_t) 2
-#define RW_ERROR_MSG       (uint32_t) 3
-#define RW_ABORT_MSG       (uint32_t) 4
 /*
 ==================================================================
 enable the defines below to send custom rtos messages
@@ -75,7 +75,7 @@ See BSP_SD_ErrorCallback() and BSP_SD_AbortCallback() below
  * Notice: This is applicable only for cortex M7 based platform.
  */
 /* USER CODE BEGIN enableSDDmaCacheMaintenance */
-// #define ENABLE_SD_DMA_CACHE_MAINTENANCE  1
+/* #define ENABLE_SD_DMA_CACHE_MAINTENANCE  1 */
 /* USER CODE BEGIN enableSDDmaCacheMaintenance */
 
 /*
@@ -84,7 +84,6 @@ See BSP_SD_ErrorCallback() and BSP_SD_AbortCallback() below
 * transfer data
 */
 #define ENABLE_SCRATCH_BUFFER
-
 
 /* Private variables ---------------------------------------------------------*/
 #if defined(ENABLE_SCRATCH_BUFFER)
@@ -505,14 +504,10 @@ void BSP_SD_ReadCpltCallback(void)
 
 void BSP_SD_ErrorCallback(void)
 {
-  // BSP_ErrorHandler();
-
-   osMessagePut(SDQueueID, RW_ERROR_MSG, osWaitForever);
 }
 
 void BSP_SD_AbortCallback(void)
 {
-  osMessagePut(SDQueueID, RW_ABORT_MSG, osWaitForever);
 }
  
 /* USER CODE END ErrorAbortCallbacks */ 

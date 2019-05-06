@@ -23,10 +23,11 @@
 /*-----------------------------------------------------------------------------/
 / Additional user header to be used  
 /-----------------------------------------------------------------------------*/
+
 #include "main.h"
 #include "stm32f4xx_hal.h"
-#include "cmsis_os.h"    /* _FS_REENTRANT set to 1 */
 #include "bsp_driver_sd.h"
+#include "cmsis_os.h" /* _FS_REENTRANT set to 1 and CMSIS API chosen */
 
 /*-----------------------------------------------------------------------------/
 / Function Configurations
@@ -47,7 +48,7 @@
 /   2: f_opendir(), f_readdir() and f_closedir() are removed in addition to 1.
 /   3: f_lseek() function is removed in addition to 2. */
 
-#define _USE_STRFUNC         2      /* 0:Disable or 1-2:Enable */
+#define _USE_STRFUNC         1      /* 0:Disable or 1-2:Enable */
 /* This option switches string functions, f_gets(), f_putc(), f_puts() and
 /  f_printf().
 /

@@ -35,7 +35,8 @@
 /* USER CODE BEGIN Includes */
 #include "app_altitude.h"
 #include "app_heartbeat.h"
-#include "app_sd.h"
+//#include "app_sd.h"
+#include "app_buzzer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -80,6 +81,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
+  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -109,7 +111,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   app_heartbeat_init();
   app_altitude_init();
-  app_sd_init();
+  //app_sd_init();
+  app_buzzer_init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
