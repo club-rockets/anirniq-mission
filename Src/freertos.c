@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-
+#include "app_buzzer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +49,7 @@
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+osMessageQId BuzzerModeQueueHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -111,6 +112,11 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of BuzzerModeQueue */
+  osMessageQDef(BuzzerModeQueue, 4, uint16_t);
+  BuzzerModeQueueHandle = osMessageCreate(osMessageQ(BuzzerModeQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -142,7 +148,16 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  osDelay(5000);
+	  /*
+	  setBuzzerMode(BUZZER_IDLE);
+	  osDelay(5000);
+	  setBuzzerMode(BUZZER_SINGLETICK);
+	  osDelay(5000);
+	  setBuzzerMode(BUZZER_DOUBLETICK);
+	  osDelay(5000);
+	  setBuzzerMode(BUZZER_TRIPLETICK);
+	  */
   }
   /* USER CODE END StartDefaultTask */
 }
