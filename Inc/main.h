@@ -61,14 +61,12 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SENSE_DROGUE_Pin GPIO_PIN_2
 #define SENSE_DROGUE_GPIO_Port GPIOE
-#define SENSE_DROGUE_EXTI_IRQn EXTI2_IRQn
 #define FIRE_DROGUE_Pin GPIO_PIN_3
 #define FIRE_DROGUE_GPIO_Port GPIOE
 #define FIRE_MAIN_Pin GPIO_PIN_4
 #define FIRE_MAIN_GPIO_Port GPIOE
 #define SENSE_MAIN_Pin GPIO_PIN_5
 #define SENSE_MAIN_GPIO_Port GPIOE
-#define SENSE_MAIN_EXTI_IRQn EXTI9_5_IRQn
 #define BUZZER_Pin GPIO_PIN_3
 #define BUZZER_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_14
@@ -87,6 +85,13 @@ void Error_Handler(void);
 #define CAN1_STANDBY_Pin GPIO_PIN_0
 #define CAN1_STANDBY_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
+
+#define EJECTION_PRIORITY osPriorityRealtime
+#define ALTITUDE_PRIORITY osPriorityHigh
+#define BUZZER_PRIORITY osPriorityLow
+#define SDCARD_PRIORITY osPriorityBelowNormal
+#define HEARTHBEAT_PRIORITY osPriorityIdle
+
 
 /* USER CODE END Private defines */
 

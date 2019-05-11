@@ -37,6 +37,7 @@
 #include "app_heartbeat.h"
 #include "app_sd.h"
 #include "app_buzzer.h"
+#include "app_ejection.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,9 +58,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
-int sense_main = 0;
-int sense_drogue = 0;
 
 /* USER CODE END PV */
 
@@ -113,8 +111,9 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
   app_heartbeat_init();
-  //app_altitude_init();
-  app_sd_init();
+  app_altitude_init();
+  ejectionTask_init();
+  //app_sd_init();
   buzzerTask_init();
   /* USER CODE END 2 */
 
@@ -190,36 +189,10 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+
   if (GPIO_Pin == SD_DETECT_Pin) {
     app_sd_detect_handler();
   }
-
-  if ((GPIO_Pin == SENSE_MAIN_Pin) || (GPIO_Pin == SENSE_DROGUE_Pin)) {
-
-	  sense_main = HAL_GPIO_ReadPin(SENSE_MAIN_GPIO_Port, SENSE_MAIN_Pin);
-	  sense_drogue = HAL_GPIO_ReadPin(SENSE_DROGUE_GPIO_Port, SENSE_DROGUE_Pin);
-
-	  if (sense_main){
-		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
-	  } else {
-		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-	}
-
-	  if (sense_drogue){
-	  		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-	  	  } else {
-	  		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-	  	}
-
-		if (sense_main && sense_drogue){
-		    setBuzzerMode(BUZZER_TRIPLETICK);
-		} else if (sense_main) {
-			setBuzzerMode(BUZZER_DOUBLETICK);
-		} else if (sense_drogue) {
-			setBuzzerMode(BUZZER_SINGLETICK);
-		}
-
-    }
 
 }
 /* USER CODE END 4 */

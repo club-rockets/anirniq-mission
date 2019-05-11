@@ -4,7 +4,7 @@
 #include "main.h"
 
 void app_heartbeat();
-osThreadDef(heartbeat, app_heartbeat, osPriorityLow, 1, 64);
+osThreadDef(heartbeat, app_heartbeat, HEARTHBEAT_PRIORITY, 1, 64);
 
 
 void app_heartbeat_init()

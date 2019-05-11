@@ -10,6 +10,8 @@ void StartBuzzerTask();
 osThreadId buzzerTaskHandle;
 int iBuzzerMode = 0;
 
+osThreadDef(buzzerTask, StartBuzzerTask, BUZZER_PRIORITY, 1, 64);
+
 void setBuzzerMode(int _imode){
 	iBuzzerMode = _imode;
 }
@@ -18,7 +20,6 @@ void buzzerTask_init()
 {
 
 	/* definition and creation of buzzerTask */
-	  osThreadDef(buzzerTask, StartBuzzerTask, osPriorityLow, 1, 64);
 	  buzzerTaskHandle = osThreadCreate(osThread(buzzerTask), NULL);
 
 }

@@ -49,7 +49,7 @@
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
-osMessageQId BuzzerModeQueueHandle;
+osMessageQId SDcardQueueHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -113,9 +113,9 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* definition and creation of BuzzerModeQueue */
-  osMessageQDef(BuzzerModeQueue, 4, uint16_t);
-  BuzzerModeQueueHandle = osMessageCreate(osMessageQ(BuzzerModeQueue), NULL);
+  /* definition and creation of SDcardQueue */
+  osMessageQDef(SDcardQueue, 16, uint16_t);
+  SDcardQueueHandle = osMessageCreate(osMessageQ(SDcardQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
