@@ -28,7 +28,7 @@
 #include "sdio.h"
 #include "spi.h"
 #include "usart.h"
-#include "usb_otg.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -38,6 +38,7 @@
 #include "app_sd.h"
 #include "app_buzzer.h"
 #include "app_ejection.h"
+#include "app_usb_serial.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,13 +109,13 @@ int main(void)
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   MX_CAN1_Init();
-  MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
   app_heartbeat_init();
   app_altitude_init();
   ejectionTask_init();
   //app_sd_init();
   buzzerTask_init();
+  //app_usb_serial_init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

@@ -8,8 +8,9 @@
 #include "app_ejection.h"
 #include "barometer/barometer.h"
 #include "kalman/kalman.h"
+#include "usbd_cdc_if.h"
 
-//static char buffer[64];
+static char buffer[64];
 
 void app_altitude();
 int Apogee_Detection(rocketdata_t *_rocket_data);
@@ -50,13 +51,19 @@ void Rocket_Data_Calibrate(rocketdata_t *_rocketdata){
 	float err = 0.0;
 
 	while (!_rocketdata->calibrated){
+
+		sprintf(buffer, "CALIBRATION\n");
+		CDC_Transmit_FS(buffer, sizeof(buffer));
+
 		osDelay(2000);
+		Rocket_Data_Update(_rocketdata);
 		_rocketdata->msl_altitude = _rocketdata->kalman.altitude;
 		osDelay(2000);
+		Rocket_Data_Update(_rocketdata);
 
 		//Small check to be sure this is the real ground altitude.
 		err = _rocketdata->msl_altitude - _rocketdata->kalman.altitude;
-		if ((err < 10.0) && (err  >-10.0)){
+		if ((err < 10.0) && (err  >-10.0) && (_rocketdata->agl_altitude < 3.0) && (_rocketdata->agl_altitude > -3.0)){
 			_rocketdata->calibrated = 1;
 		}
 	}
@@ -121,6 +128,7 @@ void app_altitude()
 
             	Rocket_Data_Calibrate(&rocketdata);
             	myRocketState = STANDBY_ON_PAD;
+
                 break;
 
             case STANDBY_ON_PAD:
@@ -221,16 +229,11 @@ void app_altitude()
             }
 
 
-        /*
+		sprintf(buffer, "State: %u \t Alt: %.2f \t Spd: %.2f \t Acc: %.2f\n", myRocketState, rocketdata.agl_altitude, rocketdata.velocity, rocketdata.acceleration);
+		CDC_Transmit_FS(buffer, sizeof(buffer));
 
-        if (HAL_GetTick() > last_save + 20) {
-            sprintf(buffer, "baro,%u,%.2f, %.2f\n",  HAL_GetTick(), barometer.pressure, barometer.temperature);
-            app_sd_write(buffer);
-            sprintf(buffer, "kalman,%u,%.2f,%.2f,%.2f\n", HAL_GetTick(), kalman.altitude, kalman.velocity, kalman.acceleration);
-            app_sd_write(buffer);
-            last_save = HAL_GetTick();
-        }
-        */
+		//app_sd_write(buffer);
+
         osDelay(20);
     }
 }

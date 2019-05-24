@@ -89,8 +89,9 @@ void Error_Handler(void);
 #define EJECTION_PRIORITY osPriorityRealtime
 #define ALTITUDE_PRIORITY osPriorityHigh
 #define BUZZER_PRIORITY osPriorityLow
-#define SDCARD_PRIORITY osPriorityBelowNormal
-#define HEARTHBEAT_PRIORITY osPriorityIdle
+#define SDCARD_PRIORITY osPriorityNormal
+#define HEARTHBEAT_PRIORITY osPriorityHigh
+#define USBSERIAL_PRIORITY osPriorityNormal
 
 
 /* USER CODE END Private defines */

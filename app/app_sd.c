@@ -18,7 +18,7 @@ static size_t data_cursor = 0;
 static osMessageQId sd_events;
 
 void app_sd();
-osThreadDef(sd, app_sd, osPriorityHigh, 1, 2048);
+osThreadDef(sd, app_sd, SDCARD_PRIORITY, 1, 4096);
 
 void app_sd_init()
 {

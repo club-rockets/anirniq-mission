@@ -49,26 +49,31 @@ void StartEjectionTask()
 
 void EjectDrogue(){
 
+	int itrycount = 0;
+
 	sense_drogue = !HAL_GPIO_ReadPin(SENSE_DROGUE_GPIO_Port, SENSE_DROGUE_Pin);
 
-	while (sense_drogue){
+	while (sense_drogue && (itrycount < TRY_NUMBER)){
 		HAL_GPIO_WritePin(FIRE_DROGUE_GPIO_Port, FIRE_DROGUE_Pin, GPIO_PIN_SET);
 		osDelay(EJECTION_PULSE_MS);
 		HAL_GPIO_WritePin(FIRE_DROGUE_GPIO_Port, FIRE_DROGUE_Pin, GPIO_PIN_RESET);
 		osDelay(EJECTION_PULSE_MS);
+		itrycount++;
 	}
-
 }
 
 void EjectMain(){
 
+	int itrycount = 0;
+
 	sense_main = !HAL_GPIO_ReadPin(SENSE_MAIN_GPIO_Port, SENSE_MAIN_Pin);
 
-	while (sense_drogue){
+	while (sense_main && (itrycount < TRY_NUMBER)){
 		HAL_GPIO_WritePin(FIRE_MAIN_GPIO_Port, FIRE_MAIN_Pin, GPIO_PIN_SET);
 		osDelay(EJECTION_PULSE_MS);
 		HAL_GPIO_WritePin(FIRE_MAIN_GPIO_Port, FIRE_MAIN_Pin, GPIO_PIN_RESET);
 		osDelay(EJECTION_PULSE_MS);
+		itrycount++;
 	}
 
 }
