@@ -6,6 +6,10 @@
 #include "main.h"
 #include "app_buzzer.h"
 
+#include "bsp_can.h"
+#include "can/can_driver.h"
+#include "bsp_can_regdef.h"
+
 void StartEjectionTask();
 
 osThreadId ejectionTaskHandle;
@@ -24,6 +28,7 @@ void ejectionTask_init()
 
 void StartEjectionTask()
 {
+	can_regData_u data = {.UINT32_T = 123};
 
     while (1) {
 

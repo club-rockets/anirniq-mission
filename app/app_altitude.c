@@ -9,6 +9,7 @@
 #include "barometer/barometer.h"
 #include "kalman/kalman.h"
 #include "usbd_cdc_if.h"
+#include "enums.h"
 
 static char buffer[64];
 

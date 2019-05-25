@@ -21,7 +21,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "can.h"
 #include "dma.h"
 #include "fatfs.h"
 #include "rtc.h"
@@ -39,6 +38,8 @@
 #include "app_buzzer.h"
 #include "app_ejection.h"
 #include "app_usb_serial.h"
+
+#include "bsp_can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,7 +60,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern canInstance_t can1Instance;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,6 +72,60 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+uint32_t can_canInit()
+{
+    //initialise IO's
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    /*Configure GPIO pins : PB8 PB9 */
+    GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    can1Instance.instance = CAN1;
+    can1Instance.debugFreeze = 0;
+    can1Instance.opMode = loopback;
+    can1Instance.baudPrescaler = 21;
+    can1Instance.timeQuanta1 = 16;
+    can1Instance.timeQuanta2 = 13;
+    can1Instance.timeReSync = 2;
+
+    canInit(&can1Instance);
+    //init interruption for fan 1 fifo 0
+    can1Fifo0InitIt(&can1Instance);
+    can1Fifo0RegisterCallback(can_regUpdateCallback);
+
+    //init filters for boards
+
+    canFilter_t filter = {0};
+
+    filter.mask11.mask0 = BOARD_ID_MASK;
+    filter.mask11.ID0 = BOARD_EMERGENCY_ID_SHIFTED;
+    filter.mask11.mask1 = BOARD_ID_MASK;
+    filter.mask11.ID1 = BOARD_MISSION_ID_SHIFTED;
+    canSetFilter(&can1Instance, &filter,mask11Bit, 0, 0);
+
+    filter.mask11.mask0 = BOARD_ID_MASK;
+    filter.mask11.ID0 = BOARD_COMMUNICATION_ID_SHIFTED;
+    filter.mask11.mask1 = BOARD_ID_MASK;
+    filter.mask11.ID1 = BOARD_ACQUISITION_ID_SHIFTED;
+    canSetFilter(&can1Instance, &filter,mask11Bit, 1, 0);
+
+    filter.mask11.mask0 = BOARD_ID_MASK;
+    filter.mask11.ID0 = BOARD_MOTHERBOARD_ID_SHIFTED;
+    filter.mask11.mask1 = BOARD_ID_MASK;
+    filter.mask11.ID1 = BOARD_MOTHERBOARD_ID_SHIFTED;
+
+    canSetFilter(&can1Instance, &filter,mask11Bit, 2, 0);
+    NVIC_SetPriority(20, 10);
+    return 0;
+}
 
 /* USER CODE END 0 */
 
@@ -108,8 +163,11 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
-  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+
+  //Init CAN Driver
+  can_canInit();
+
   app_heartbeat_init();
   app_altitude_init();
   ejectionTask_init();

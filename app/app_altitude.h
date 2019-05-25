@@ -21,22 +21,6 @@ typedef struct {
 	uint32_t calibrated;
 } rocketdata_t;
 
-typedef enum rocket_state {
-	INITIALISATION,
-	STANDBY_ON_PAD,
-	LAUNCH,
-	POWERED_ASCENT,
-	ENGINE_BURNOUT,
-	COASTING_ASCENT,
-	APOGEE_REACHED,
-	DROGUE_DEPLOYMENT,
-	DROGUE_DESCENT,
-	MAIN_DEPLOYMENT,
-	MAIN_DESCENT,
-	LANDING,
-	RECOVERY,
-	PICKEDUP} rocket_state;
-
 /******************************************************************************/
 /*                                Define                                      */
 /******************************************************************************/
