@@ -28,7 +28,7 @@ void ejectionTask_init()
 
 void StartEjectionTask()
 {
-	can_regData_u data = {.UINT32_T = 123};
+	can_regData_u data = {.UINT32_T = NO_CHARGE};
 
     while (1) {
 
@@ -40,13 +40,19 @@ void StartEjectionTask()
 
 		if (sense_main && sense_drogue){
 			setBuzzerMode(BUZZER_TRIPLETICK);
+			data.UINT32_T = BOTH_SENSE;
 		} else if (sense_main) {
 			setBuzzerMode(BUZZER_DOUBLETICK);
+			data.UINT32_T = MAIN_SENSE;
 		} else if (sense_drogue) {
 			setBuzzerMode(BUZZER_SINGLETICK);
+			data.UINT32_T = DROGUE_SENSE;
 		} else {
 			setBuzzerMode(BUZZER_IDLE);
+			data.UINT32_T = NO_CHARGE;
 		}
+
+		can_canSetRegisterData(CAN_MISSION_CHARGE_STATUS_INDEX, &data);
 
 		osDelay(1000);
     }

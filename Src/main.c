@@ -91,9 +91,9 @@ uint32_t can_canInit()
     can1Instance.instance = CAN1;
     can1Instance.debugFreeze = 0;
     can1Instance.opMode = loopback;
-    can1Instance.baudPrescaler = 21;
-    can1Instance.timeQuanta1 = 16;
-    can1Instance.timeQuanta2 = 13;
+    can1Instance.baudPrescaler = 3;
+    can1Instance.timeQuanta1 = 14;
+    can1Instance.timeQuanta2 = 11;
     can1Instance.timeReSync = 2;
 
     canInit(&can1Instance);
@@ -167,6 +167,7 @@ int main(void)
 
   //Init CAN Driver
   can_canInit();
+  HAL_GPIO_WritePin(CAN1_STANDBY_GPIO_Port, CAN1_STANDBY_Pin, GPIO_PIN_RESET);
 
   app_heartbeat_init();
   app_altitude_init();
