@@ -18,3 +18,4 @@ bin/
 # VS Code
 .vscode/
 /Default/
+/Debug/

@@ -38,7 +38,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+#define CAN_BOARD MISSION
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

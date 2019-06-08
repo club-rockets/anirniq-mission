@@ -11,6 +11,10 @@
 #include "usbd_cdc_if.h"
 #include "enums.h"
 
+#include "bsp_can.h"
+#include "id.h"
+#include "enums.h"
+
 static char buffer[64];
 
 void app_altitude();
@@ -119,6 +123,8 @@ void app_altitude()
 
     Rocket_Data_Init(&rocketdata);
 
+    can_regData_u regData = {0};
+
     while (1) {
 
     	Rocket_Data_Update(&rocketdata);
@@ -129,6 +135,8 @@ void app_altitude()
 
             	Rocket_Data_Calibrate(&rocketdata);
             	myRocketState = STANDBY_ON_PAD;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
@@ -137,6 +145,8 @@ void app_altitude()
                 // safety: si l'altitude est assez grande on skip...
                 if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
                 	myRocketState = LAUNCH;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
@@ -145,6 +155,8 @@ void app_altitude()
 
                 if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER) {
                 	myRocketState = POWERED_ASCENT;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
@@ -154,18 +166,24 @@ void app_altitude()
             	// Engine in burnout when acceleration below 0
                 if (rocketdata.acceleration < 0) {
                 	myRocketState = ENGINE_BURNOUT;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
 
             case ENGINE_BURNOUT:
             	myRocketState = COASTING_ASCENT;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 break;
 
             case COASTING_ASCENT:
 
                 if (Apogee_Detection(&rocketdata) == 1) {
                 	myRocketState = APOGEE_REACHED;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
@@ -173,6 +191,8 @@ void app_altitude()
                 //l'etat d'apogee ne dure qu'un time step
             case APOGEE_REACHED:
             	myRocketState = DROGUE_DEPLOYMENT;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 break;
 
 
@@ -180,6 +200,8 @@ void app_altitude()
 
             	EjectDrogue();
 				myRocketState = DROGUE_DESCENT;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
@@ -189,6 +211,8 @@ void app_altitude()
                 //if (rocket_data.agl_altitude < MAIN_EJECTION_ALTITUDE && temp_rocket->Mission_Time > temp_rocket->Altimeter->Apogee_Time + 2000 + APOGEE_EJECTION_DELAY_MS) {
 				if (rocketdata.agl_altitude < MAIN_EJECTION_ALTITUDE) {
                 	myRocketState = MAIN_DEPLOYMENT;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
@@ -197,6 +221,8 @@ void app_altitude()
 
             	EjectMain();
 				myRocketState = MAIN_DESCENT;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
@@ -204,6 +230,8 @@ void app_altitude()
                 //lorsque la fusee atteint le meme threshold que pour le flight mode
                 if (rocketdata.agl_altitude < MAIN_EJECTION_ALTITUDE) {
                 	myRocketState = LANDING;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
                 break;
 
@@ -211,12 +239,16 @@ void app_altitude()
                 //lorsque la vitesse n'est plus negative,
                 if (rocketdata.velocity > 0) {
                 	myRocketState = RECOVERY;
+                	regData.UINT32_T = myRocketState;
+                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
                 break;
 
             case RECOVERY:
 
                 myRocketState = PICKEDUP;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
@@ -226,6 +258,8 @@ void app_altitude()
 
             default:
             	myRocketState = INITIALISATION;
+            	regData.UINT32_T = myRocketState;
+            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 break;
             }
 
