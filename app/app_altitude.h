@@ -12,7 +12,7 @@ typedef struct {
 	barometer_t barometer;
 	kalman_t kalman;
 
-	float msl_altitude;// mean sea level altitude
+	float ground_altitude;// mean sea level altitude
 	float agl_altitude;// above ground level altitude
 	float velocity;
 	float acceleration;
@@ -24,6 +24,8 @@ typedef struct {
 /******************************************************************************/
 /*                                Define                                      */
 /******************************************************************************/
+#define APP_ALTITUDE_CYCLE_MS		  20
+#define CALIBRATION_DELAY_MS		 500
 #define APOGEE_EJECTION_DELAY_MS 	2000 //delais d'ejection apres la detection d'apogee en millisec
 #define ULTRASONIC_DELAY_MS 		1000 //delais minimum apres le launch avant de pouvoir detection l'apogee en millisec
 #define LAUNCH_ACCEL_TRIGGER	 	   5 // valeur proportionnelle a l'accel qui declanche le launch state

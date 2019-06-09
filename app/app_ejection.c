@@ -38,19 +38,9 @@ void StartEjectionTask()
 		HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, sense_main);
 		HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, sense_drogue);
 
-		if (sense_main && sense_drogue){
-			setBuzzerMode(BUZZER_TRIPLETICK);
-			data.UINT32_T = BOTH_SENSE;
-		} else if (sense_main) {
-			setBuzzerMode(BUZZER_DOUBLETICK);
-			data.UINT32_T = MAIN_SENSE;
-		} else if (sense_drogue) {
-			setBuzzerMode(BUZZER_SINGLETICK);
-			data.UINT32_T = DROGUE_SENSE;
-		} else {
-			setBuzzerMode(BUZZER_IDLE);
-			data.UINT32_T = NO_CHARGE;
-		}
+
+		data.UINT32_T = sense_drogue | sense_main;
+		setBuzzerMode(data.UINT32_T);
 
 		can_canSetRegisterData(CAN_MISSION_CHARGE_STATUS_INDEX, &data);
 

@@ -15,7 +15,7 @@
 #include "id.h"
 #include "enums.h"
 
-static char buffer[64];
+//static char buffer[64];
 
 void app_altitude();
 int Apogee_Detection(rocketdata_t *_rocket_data);
@@ -30,18 +30,12 @@ void app_altitude_init()
     osThreadCreate(osThread(altitude), NULL);
 }
 
-void Rocket_Data_Init(rocketdata_t *_rocketdata) {
+void Rocket_Data_Init(rocketdata_t *_rocketdata)
+{
+	barometer_init(&(_rocketdata->barometer), BARO_CS_GPIO_Port, BARO_CS_Pin, &hspi2);
+	kalman_init(&(_rocketdata->kalman));
 
-	barometer_t barometer;
-	barometer_init(&barometer, BARO_CS_GPIO_Port, BARO_CS_Pin, &hspi2);
-
-	kalman_t kalman;
-	kalman_init(&kalman);
-
-	_rocketdata->barometer = barometer;
-	_rocketdata->kalman = kalman;
-
-	_rocketdata->msl_altitude = 0;
+	_rocketdata->ground_altitude = 0;
 	_rocketdata->agl_altitude = 0;
 	_rocketdata->acceleration = 0;
 	_rocketdata->velocity = 0;
@@ -55,20 +49,20 @@ void Rocket_Data_Calibrate(rocketdata_t *_rocketdata){
 
 	float err = 0.0;
 
-	while (!_rocketdata->calibrated){
+	while (!_rocketdata->calibrated) {
 
-		sprintf(buffer, "CALIBRATION\n");
-		CDC_Transmit_FS(buffer, sizeof(buffer));
+//		sprintf(buffer, "CALIBRATION\n");
+//		CDC_Transmit_FS(buffer, sizeof(buffer));
 
-		osDelay(2000);
+		osDelay(CALIBRATION_DELAY_MS);
 		Rocket_Data_Update(_rocketdata);
-		_rocketdata->msl_altitude = _rocketdata->kalman.altitude;
-		osDelay(2000);
+		_rocketdata->ground_altitude = _rocketdata->kalman.altitude;
+		osDelay(CALIBRATION_DELAY_MS);
 		Rocket_Data_Update(_rocketdata);
 
 		//Small check to be sure this is the real ground altitude.
-		err = _rocketdata->msl_altitude - _rocketdata->kalman.altitude;
-		if ((err < 10.0) && (err  >-10.0) && (_rocketdata->agl_altitude < 3.0) && (_rocketdata->agl_altitude > -3.0)){
+		err = abs(_rocketdata->ground_altitude - _rocketdata->kalman.altitude);
+		if (err < 3.0) {
 			_rocketdata->calibrated = 1;
 		}
 	}
@@ -84,7 +78,7 @@ void Rocket_Data_Update(rocketdata_t *_rocketdata){
 	kalman_update(&(_rocketdata->kalman), pressure_to_altitude(_rocketdata->barometer.pressure), 0, (HAL_GetTick() - _rocketdata->last_update) / 1000.0f);
 	_rocketdata->last_update = HAL_GetTick();
 
-	_rocketdata->agl_altitude = _rocketdata->kalman.altitude - _rocketdata->msl_altitude;
+	_rocketdata->agl_altitude = _rocketdata->kalman.altitude - _rocketdata->ground_altitude;
 	_rocketdata->acceleration = _rocketdata->kalman.acceleration;
 	_rocketdata->velocity = _rocketdata->kalman.velocity;
 }
@@ -95,8 +89,8 @@ int Apogee_Detection(rocketdata_t *_rocket_data) {
 	int Apogee_Estimation = 0;
 	//estimation de l'apogee
 		  //n,est valide qu'en coasting ascent
-		  // s(apogee) = s0 + 1.5 * v^2 / a
-	Apogee_Estimation = _rocket_data->agl_altitude + 1.5 * (_rocket_data->velocity) * (_rocket_data->velocity) / _rocket_data->acceleration;
+		  // s(apogee) = s0 - 0.5 * v^2 / a
+	Apogee_Estimation = _rocket_data->agl_altitude - 0.5 * (_rocket_data->velocity) * (_rocket_data->velocity) / _rocket_data->acceleration;
 
   //essaie pour contré le sonic boom sans le delais
   //estime l'altitude de l'apogee et si la difference est trop grande
@@ -120,6 +114,7 @@ void app_altitude()
 
     rocketdata_t rocketdata;
     rocket_state myRocketState = INITIALISATION;
+    rocket_state previous_myRocketState = INITIALISATION;
 
     Rocket_Data_Init(&rocketdata);
 
@@ -129,34 +124,24 @@ void app_altitude()
 
     	Rocket_Data_Update(&rocketdata);
 
+    	previous_myRocketState = myRocketState;
+
         switch (myRocketState) {
 
             case INITIALISATION:
 
             	Rocket_Data_Calibrate(&rocketdata);
             	myRocketState = STANDBY_ON_PAD;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+
 
                 break;
 
             case STANDBY_ON_PAD:
                 //on detecte le lancement avec l'acceleration
                 // safety: si l'altitude est assez grande on skip...
-                if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
-                	myRocketState = LAUNCH;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
-                }
-
-                break;
-
-            case LAUNCH:
-
+//                if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
                 if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER) {
                 	myRocketState = POWERED_ASCENT;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
 
                 break;
@@ -165,43 +150,17 @@ void app_altitude()
 
             	// Engine in burnout when acceleration below 0
                 if (rocketdata.acceleration < 0) {
-                	myRocketState = ENGINE_BURNOUT;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+                	myRocketState = COASTING_ASCENT;
                 }
 
-                break;
-
-            case ENGINE_BURNOUT:
-            	myRocketState = COASTING_ASCENT;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 break;
 
             case COASTING_ASCENT:
 
                 if (Apogee_Detection(&rocketdata) == 1) {
-                	myRocketState = APOGEE_REACHED;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+                	EjectDrogue();
+                	myRocketState = DROGUE_DESCENT;
                 }
-
-                break;
-
-                //l'etat d'apogee ne dure qu'un time step
-            case APOGEE_REACHED:
-            	myRocketState = DROGUE_DEPLOYMENT;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
-                break;
-
-
-            case DROGUE_DEPLOYMENT:
-
-            	EjectDrogue();
-				myRocketState = DROGUE_DESCENT;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
@@ -210,28 +169,16 @@ void app_altitude()
                 //starts 2sec after drogue deployment
                 //if (rocket_data.agl_altitude < MAIN_EJECTION_ALTITUDE && temp_rocket->Mission_Time > temp_rocket->Altimeter->Apogee_Time + 2000 + APOGEE_EJECTION_DELAY_MS) {
 				if (rocketdata.agl_altitude < MAIN_EJECTION_ALTITUDE) {
-                	myRocketState = MAIN_DEPLOYMENT;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+					EjectMain();
+                	myRocketState = MAIN_DESCENT;
                 }
-
-                break;
-
-            case MAIN_DEPLOYMENT:
-
-            	EjectMain();
-				myRocketState = MAIN_DESCENT;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
 
                 break;
 
             case MAIN_DESCENT:
                 //lorsque la fusee atteint le meme threshold que pour le flight mode
-                if (rocketdata.agl_altitude < MAIN_EJECTION_ALTITUDE) {
+                if (rocketdata.agl_altitude < FLIGHT_ALTITUDE_TRIGGER) {
                 	myRocketState = LANDING;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
                 break;
 
@@ -239,36 +186,28 @@ void app_altitude()
                 //lorsque la vitesse n'est plus negative,
                 if (rocketdata.velocity > 0) {
                 	myRocketState = RECOVERY;
-                	regData.UINT32_T = myRocketState;
-                	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 }
                 break;
 
             case RECOVERY:
 
-                myRocketState = PICKEDUP;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
-
-                break;
-
-            case PICKEDUP:
-            	 HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
                 break;
 
             default:
             	myRocketState = INITIALISATION;
-            	regData.UINT32_T = myRocketState;
-            	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
                 break;
             }
 
+        if (previous_myRocketState != myRocketState){
+        	regData.UINT32_T = myRocketState;
+        	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+        }
 
-		sprintf(buffer, "State: %u \t Alt: %.2f \t Spd: %.2f \t Acc: %.2f\n", myRocketState, rocketdata.agl_altitude, rocketdata.velocity, rocketdata.acceleration);
-		CDC_Transmit_FS(buffer, sizeof(buffer));
+//		sprintf(buffer, "State: %u \t Alt: %.2f \t Spd: %.2f \t Acc: %.2f\n", myRocketState, rocketdata.agl_altitude, rocketdata.velocity, rocketdata.acceleration);
+//		CDC_Transmit_FS(buffer, sizeof(buffer));
 
 		//app_sd_write(buffer);
 
-        osDelay(20);
+        osDelay(APP_ALTITUDE_CYCLE_MS);
     }
 }

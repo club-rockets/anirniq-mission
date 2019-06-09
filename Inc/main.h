@@ -38,12 +38,12 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-#define CAN_BOARD MISSION
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+#define CAN_BOARD MISSION
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -55,7 +55,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-#define CAN_BOARD MISSION
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -86,11 +86,11 @@ void Error_Handler(void);
 #define CAN1_STANDBY_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
-#define EJECTION_PRIORITY osPriorityRealtime
+#define EJECTION_PRIORITY osPriorityNormal
 #define ALTITUDE_PRIORITY osPriorityHigh
 #define BUZZER_PRIORITY osPriorityLow
 #define SDCARD_PRIORITY osPriorityNormal
-#define HEARTHBEAT_PRIORITY osPriorityHigh
+#define HEARTHBEAT_PRIORITY osPriorityIdle
 #define USBSERIAL_PRIORITY osPriorityNormal
 
 
