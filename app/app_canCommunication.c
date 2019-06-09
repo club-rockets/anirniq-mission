@@ -31,17 +31,25 @@ void tsk_canCommunication(void*arg){
 	osTimerStart(transmitRegHandle,100);
 
 	can_setRegisterCallback(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_DROGUE_INDEX,regChangeCallback);
-	can_setRegisterCallback(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_DROGUE_INDEX,regChangeCallback);
+	can_setRegisterCallback(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_MAIN_INDEX,regChangeCallback);
 
 	osEvent evt;
-
+	can_regData_u regData;
 	while(1){
 		evt = osSignalWait(SIGNAL_EJECT_DROGUE|SIGNAL_EJECT_MAIN,osWaitForever);
 		if(evt.status == osEventSignal && evt.value.signals & SIGNAL_EJECT_DROGUE){
-			EjectDrogue();
+			can_getRegisterData(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_DROGUE_INDEX,&regData);
+			if(regData.UINT32_T == EJECTION){
+				EjectDrogue();
+				can_setRegisterCallback(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_DROGUE_INDEX,0);
+			}
 		}
 		if(evt.status == osEventSignal && evt.value.signals & SIGNAL_EJECT_MAIN){
-			EjectMain();
+			can_getRegisterData(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_MAIN_INDEX,&regData);
+			if(regData.UINT32_T == EJECTION){
+				EjectMain();
+				can_setRegisterCallback(COMMUNICATION,CAN_COMMUNICATION_CONTROL_EJECT_MAIN_INDEX,0);
+			}
 		}
 	}
 }

@@ -90,7 +90,7 @@ uint32_t can_canInit()
 
     can1Instance.instance = CAN1;
     can1Instance.debugFreeze = 0;
-    can1Instance.opMode = loopback;
+    can1Instance.opMode = normal;
     can1Instance.baudPrescaler = 3;
     can1Instance.timeQuanta1 = 14;
     can1Instance.timeQuanta2 = 11;
