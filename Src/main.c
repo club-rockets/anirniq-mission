@@ -114,14 +114,8 @@ uint32_t can_canInit()
     filter.mask11.mask0 = BOARD_ID_MASK;
     filter.mask11.ID0 = BOARD_COMMUNICATION_ID_SHIFTED;
     filter.mask11.mask1 = BOARD_ID_MASK;
-    filter.mask11.ID1 = 0;
+    filter.mask11.ID1 = BOARD_COMMUNICATION_ID_SHIFTED;
     canSetFilter(&can1Instance, &filter,mask11Bit, 1, 0);
-
-    filter.mask11.mask0 = BOARD_ID_MASK;
-    filter.mask11.ID0 = 0;
-    filter.mask11.mask1 = BOARD_ID_MASK;
-    filter.mask11.ID1 = 0;
-    canSetFilter(&can1Instance, &filter,mask11Bit, 2, 0);
 
     NVIC_SetPriority(20, 10);
     return 0;
