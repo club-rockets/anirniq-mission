@@ -39,7 +39,7 @@ void StartEjectionTask()
 		HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, sense_drogue);
 
 	
-		data.UINT32_T = (sense_drogue << 1) | sense_main;
+		data.UINT32_T = (sense_drogue) | (sense_main << 1);
 		setBuzzerMode(data.UINT32_T);
 
 		can_canSetRegisterData(CAN_MISSION_CHARGE_STATUS_INDEX, &data);

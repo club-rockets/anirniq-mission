@@ -33,19 +33,19 @@ void StartBuzzerTask()
 
 		   case BUZZER_TRIPLETICK:
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			   osDelay(CYCLE_TIME);
+			   osDelay(BEEP_LENGTH);
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
 			   osDelay(BEEP_LENGTH);
 
 		   case BUZZER_DOUBLETICK:
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			   osDelay(CYCLE_TIME);
+			   osDelay(BEEP_LENGTH);
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
 			   osDelay(BEEP_LENGTH);
 
 		   case BUZZER_SINGLETICK:
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET);
-			   osDelay(CYCLE_TIME);
+			   osDelay(BEEP_LENGTH);
 			   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
 			   osDelay(BEEP_LENGTH);
 
@@ -59,5 +59,6 @@ void StartBuzzerTask()
     		   iBuzzerMode = 0;
     	}
 
+		osDelay(CYCLE_TIME - BEEP_LENGTH);
     }
 }
