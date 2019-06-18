@@ -29,7 +29,7 @@ typedef struct {
 #define APOGEE_EJECTION_DELAY_MS 	2000 //delais d'ejection apres la detection d'apogee en millisec
 #define ULTRASONIC_DELAY_MS 		1000 //delais minimum apres le launch avant de pouvoir detection l'apogee en millisec
 #define LAUNCH_ACCEL_TRIGGER	 	   5 // valeur proportionnelle a l'accel qui declanche le launch state
-#define FLIGHT_ALTITUDE_TRIGGER      100 // altitude apres la detection du launch a laquelle on change d'etat en metre
+#define FLIGHT_ALTITUDE_TRIGGER      300 // altitude apres la detection du launch a laquelle on change d'etat en metre
 #define MAIN_EJECTION_ALTITUDE	 	 333 //altitude de deploiement du MAIN chute en metre
 
 void app_altitude_init();

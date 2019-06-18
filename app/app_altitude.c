@@ -119,12 +119,15 @@ void app_altitude()
     Rocket_Data_Init(&rocketdata);
 
     can_regData_u regData = {0};
+    can_regData_u rxRegData = {0};
 
     while (1) {
 
     	Rocket_Data_Update(&rocketdata);
 
     	previous_myRocketState = myRocketState;
+
+    	can_getRegisterData(COMMUNICATION,CAN_COMMUNICATION_STATUS_INDEX,&rxRegData);
 
         switch (myRocketState) {
 
@@ -140,7 +143,7 @@ void app_altitude()
                 //on detecte le lancement avec l'acceleration
                 // safety: si l'altitude est assez grande on skip...
 //                if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
-                if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER) {
+                if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER && rxRegData.UINT32_T == LAUNCH_TRANSMISSION) {
                 	myRocketState = POWERED_ASCENT;
                 }
 
