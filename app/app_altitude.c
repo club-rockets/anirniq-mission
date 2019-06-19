@@ -92,7 +92,7 @@ int Apogee_Detection(rocketdata_t *_rocket_data) {
 		  // s(apogee) = s0 - 0.5 * v^2 / a
 	Apogee_Estimation = _rocket_data->agl_altitude - 0.5 * (_rocket_data->velocity) * (_rocket_data->velocity) / _rocket_data->acceleration;
 
-  //essaie pour contré le sonic boom sans le delais
+  //essaie pour contrï¿½ le sonic boom sans le delais
   //estime l'altitude de l'apogee et si la difference est trop grande
   //on annule le projet tu suite
   if (_rocket_data->agl_altitude - Apogee_Estimation < 500) {
@@ -111,7 +111,7 @@ int Apogee_Detection(rocketdata_t *_rocket_data) {
 
 void app_altitude()
 {
-
+    uint32_t launch_tick = 0;
     rocketdata_t rocketdata;
     rocket_state myRocketState = INITIALISATION;
     rocket_state previous_myRocketState = INITIALISATION;
@@ -144,6 +144,7 @@ void app_altitude()
                 // safety: si l'altitude est assez grande on skip...
 //                if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
                 if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER && rxRegData.UINT32_T == LAUNCH_TRANSMISSION) {
+                    launch_tick = HAL_GetTick();
                 	myRocketState = POWERED_ASCENT;
                 }
 
@@ -152,7 +153,7 @@ void app_altitude()
             case POWERED_ASCENT:
 
             	// Engine in burnout when acceleration below 0
-                if (rocketdata.acceleration < 0) {
+                if ((HAL_GetTick() - launch_tick) > ULTRASONIC_DELAY_MS && rocketdata.acceleration < 0) {
                 	myRocketState = COASTING_ASCENT;
                 }
 

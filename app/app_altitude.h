@@ -12,8 +12,8 @@ typedef struct {
 	barometer_t barometer;
 	kalman_t kalman;
 
-	float ground_altitude;// mean sea level altitude
-	float agl_altitude;// above ground level altitude
+	float ground_altitude; // mean sea level altitude
+	float agl_altitude;    // above ground level altitude
 	float velocity;
 	float acceleration;
 
@@ -24,13 +24,13 @@ typedef struct {
 /******************************************************************************/
 /*                                Define                                      */
 /******************************************************************************/
-#define APP_ALTITUDE_CYCLE_MS		  20
-#define CALIBRATION_DELAY_MS		 500
-#define APOGEE_EJECTION_DELAY_MS 	2000 //delais d'ejection apres la detection d'apogee en millisec
-#define ULTRASONIC_DELAY_MS 		1000 //delais minimum apres le launch avant de pouvoir detection l'apogee en millisec
-#define LAUNCH_ACCEL_TRIGGER	 	   5 // valeur proportionnelle a l'accel qui declanche le launch state
-#define FLIGHT_ALTITUDE_TRIGGER      300 // altitude apres la detection du launch a laquelle on change d'etat en metre
-#define MAIN_EJECTION_ALTITUDE	 	 333 //altitude de deploiement du MAIN chute en metre
+#define APP_ALTITUDE_CYCLE_MS         20
+#define CALIBRATION_DELAY_MS         500
+#define APOGEE_EJECTION_DELAY_MS     100 //delais d'ejection apres la detection d'apogee en millisec
+#define ULTRASONIC_DELAY_MS         4000 //delais minimum apres le launch avant de pouvoir detection l'apogee en millisec
+#define LAUNCH_ACCEL_TRIGGER           5 // valeur proportionnelle a l'accel qui declanche le launch state
+#define FLIGHT_ALTITUDE_TRIGGER      500 // altitude apres la detection du launch a laquelle on change d'etat en metre
+#define MAIN_EJECTION_ALTITUDE       450 //altitude de deploiement du MAIN chute en metre
 
 void app_altitude_init();
 
