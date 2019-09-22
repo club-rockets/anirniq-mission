@@ -79,9 +79,8 @@ void Error_Handler(void);
 #define LED4_GPIO_Port GPIOB
 #define BARO_CS_Pin GPIO_PIN_12
 #define BARO_CS_GPIO_Port GPIOB
-#define SD_DETECT_Pin GPIO_PIN_3
-#define SD_DETECT_GPIO_Port GPIOD
-#define SD_DETECT_EXTI_IRQn EXTI3_IRQn
+#define sd_detect_Pin GPIO_PIN_3
+#define sd_detect_GPIO_Port GPIOD
 #define CAN1_STANDBY_Pin GPIO_PIN_0
 #define CAN1_STANDBY_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */

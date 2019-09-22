@@ -243,9 +243,9 @@ void SystemClock_Config(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 
-  if (GPIO_Pin == SD_DETECT_Pin) {
+//  if (GPIO_Pin == SD_DETECT_Pin) {
 //    app_sd_detect_handler();
-  }
+//  }
 
 }
 /* USER CODE END 4 */

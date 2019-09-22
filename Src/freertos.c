@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 #include "app_buzzer.h"
+#include "app_sd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +51,7 @@
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId app_canCommunicHandle;
-osMessageQId SDcardQueueHandle;
+osThreadId app_SDHandle;
 osTimerId transmitRegHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,11 +61,18 @@ osTimerId transmitRegHandle;
 
 void StartDefaultTask(void const * argument);
 extern void tsk_canCommunication(void const * argument);
+extern void stk_SD(void const * argument);
 extern void canTransmitRegCallback(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* GetIdleTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
+
+/* GetTimerTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
 
 /* Hook prototypes */
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
@@ -95,6 +103,32 @@ __weak void vApplicationMallocFailedHook(void)
 }
 /* USER CODE END 5 */
 
+/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
+static StaticTask_t xIdleTaskTCBBuffer;
+static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
+  
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
+  *ppxIdleTaskStackBuffer = &xIdleStack[0];
+  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+  /* place for user code */
+}                   
+/* USER CODE END GET_IDLE_TASK_MEMORY */
+
+/* USER CODE BEGIN GET_TIMER_TASK_MEMORY */
+static StaticTask_t xTimerTaskTCBBuffer;
+static StackType_t xTimerStack[configTIMER_TASK_STACK_DEPTH];
+  
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )  
+{
+  *ppxTimerTaskTCBBuffer = &xTimerTaskTCBBuffer;
+  *ppxTimerTaskStackBuffer = &xTimerStack[0];
+  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+  /* place for user code */
+}                   
+/* USER CODE END GET_TIMER_TASK_MEMORY */
+
 /**
   * @brief  FreeRTOS initialization
   * @param  None
@@ -122,11 +156,6 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
-  /* Create the queue(s) */
-  /* definition and creation of SDcardQueue */
-  osMessageQDef(SDcardQueue, 16, uint16_t);
-  SDcardQueueHandle = osMessageCreate(osMessageQ(SDcardQueue), NULL);
-
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -139,6 +168,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of app_canCommunic */
   osThreadDef(app_canCommunic, tsk_canCommunication, osPriorityNormal, 0, 128);
   app_canCommunicHandle = osThreadCreate(osThread(app_canCommunic), NULL);
+
+  /* definition and creation of app_SD */
+  osThreadDef(app_SD, stk_SD, osPriorityNormal, 0, 1000);
+  app_SDHandle = osThreadCreate(osThread(app_SD), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
