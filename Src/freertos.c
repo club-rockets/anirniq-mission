@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */     
 #include "app_buzzer.h"
 #include "app_sd.h"
+#include "app_acc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +53,7 @@
 osThreadId defaultTaskHandle;
 osThreadId app_canCommunicHandle;
 osThreadId app_SDHandle;
+osThreadId app_accHandle;
 osTimerId transmitRegHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,6 +64,7 @@ osTimerId transmitRegHandle;
 void StartDefaultTask(void const * argument);
 extern void tsk_canCommunication(void const * argument);
 extern void stk_SD(void const * argument);
+extern void task_acc(void const * argument);
 extern void canTransmitRegCallback(void const * argument);
 
 extern void MX_FATFS_Init(void);
@@ -172,6 +175,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of app_SD */
   osThreadDef(app_SD, stk_SD, osPriorityNormal, 0, 1000);
   app_SDHandle = osThreadCreate(osThread(app_SD), NULL);
+
+  /* definition and creation of app_acc */
+  osThreadDef(app_acc, task_acc, osPriorityNormal, 0, 128);
+  app_accHandle = osThreadCreate(osThread(app_acc), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define SENSE_MAIN_GPIO_Port GPIOE
 #define BUZZER_Pin GPIO_PIN_3
 #define BUZZER_GPIO_Port GPIOA
+#define ACC_CS_Pin GPIO_PIN_4
+#define ACC_CS_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_14
 #define LED1_GPIO_Port GPIOE
 #define LED2_Pin GPIO_PIN_15

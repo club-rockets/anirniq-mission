@@ -157,6 +157,7 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   //Init CAN Driver
