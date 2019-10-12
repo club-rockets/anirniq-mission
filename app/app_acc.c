@@ -39,6 +39,12 @@ void spiRx(uint8_t* data,uint32_t size){
 }
 
 
+float acc_convert(int16_t raw){
+	float temp = (float)raw;
+	temp *= 0.049f;
+	return temp/16;
+}
+
 void task_acc(void const * argument){
 
 uint8_t txBuff[6] = {0};
@@ -60,9 +66,12 @@ txBuff[0] = ( (1<<7) | (1<<6) | (0x0f<<0) );
 
 		//todo convert values to m/s^2
 
-		sd_writeInt("acc_x",data.data.x);
-		sd_writeInt("acc_y",data.data.y);
-		sd_writeInt("acc_z",data.data.z);
+		//sd_writeInt("acc_x",data.data.x);
+		//sd_writeInt("acc_y",data.data.y);
+		//sd_writeInt("acc_z",data.data.z);
+		sd_writeFloat("acc_x",acc_convert(data.data.x));
+		sd_writeFloat("acc_y",acc_convert(data.data.y));
+		sd_writeFloat("acc_z",acc_convert(data.data.z));
 
 	}
 

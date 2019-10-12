@@ -29,6 +29,7 @@ void ejectionTask_init()
 void StartEjectionTask()
 {
 	can_regData_u data = {.UINT32_T = NO_CHARGE};
+	uint32_t sensed = 0;  //continuous beep after the charges are blown
 
     while (1) {
 
@@ -40,7 +41,16 @@ void StartEjectionTask()
 
 	
 		data.UINT32_T = (sense_drogue) | (sense_main << 1);
-		setBuzzerMode(data.UINT32_T);
+		if(data.UINT32_T>sensed){
+			sensed = data.UINT32_T;
+		}
+		if(data.UINT32_T<sensed){
+			setBuzzerMode(BUZZER_CONTINUOUS_TICK);
+		}
+		else{
+			setBuzzerMode(data.UINT32_T);
+		}
+
 
 		can_canSetRegisterData(CAN_MISSION_CHARGE_STATUS_INDEX, &data);
 
@@ -61,6 +71,7 @@ void EjectDrogue(){
 		osDelay(EJECTION_PULSE_MS);
 		itrycount++;
 	}
+
 }
 
 void EjectMain(){

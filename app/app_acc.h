@@ -8,10 +8,10 @@
 
 union accData{
 	uint8_t bytes[6];
-	struct{
-		uint16_t x;
-		uint16_t y;
-		uint16_t z;
+	struct __attribute__((__packed__)) {
+		int16_t x;
+		int16_t y;
+		int16_t z;
 	}data;
 };
 

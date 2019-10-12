@@ -54,11 +54,15 @@ void StartBuzzerTask()
     		   osDelay(CYCLE_TIME);
     	       break;
 
+    	   case BUZZER_CONTINUOUS_TICK:
+    		   HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin);
+    		   osDelay(BEEP_LENGTH);
+    		   break;
+
     	   /* you can have any number of case statements */
     	   default : /* Optional */
     		   iBuzzerMode = 0;
     	}
 
-		osDelay(CYCLE_TIME - BEEP_LENGTH);
     }
 }

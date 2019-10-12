@@ -29,6 +29,7 @@
 #include "app_buzzer.h"
 #include "app_sd.h"
 #include "app_acc.h"
+#include "app_heartbeat.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

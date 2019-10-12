@@ -81,6 +81,10 @@ void Rocket_Data_Update(rocketdata_t *_rocketdata){
 	_rocketdata->agl_altitude = _rocketdata->kalman.altitude - _rocketdata->ground_altitude;
 	_rocketdata->acceleration = _rocketdata->kalman.acceleration;
 	_rocketdata->velocity = _rocketdata->kalman.velocity;
+
+	sd_writeFloat("agl_altitude",_rocketdata->agl_altitude);
+	sd_writeFloat("acceleration",_rocketdata->acceleration);
+	sd_writeFloat("velocity",_rocketdata->velocity);
 }
 
 // Calculate apogee detection
@@ -143,7 +147,8 @@ void app_altitude()
                 //on detecte le lancement avec l'acceleration
                 // safety: si l'altitude est assez grande on skip...
 //                if (rocketdata.acceleration > LAUNCH_ACCEL_TRIGGER || (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER)) {
-                if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER && rxRegData.UINT32_T == LAUNCH_TRANSMISSION) {
+//                if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER && rxRegData.UINT32_T == LAUNCH_TRANSMISSION) {
+                if (rocketdata.agl_altitude > FLIGHT_ALTITUDE_TRIGGER) {
                     launch_tick = HAL_GetTick();
                 	myRocketState = POWERED_ASCENT;
                 }
@@ -205,6 +210,7 @@ void app_altitude()
         if (previous_myRocketState != myRocketState){
         	regData.UINT32_T = myRocketState;
         	can_canSetRegisterData(CAN_MISSION_ROCKET_STATUS_INDEX,&regData);
+        	sd_writeInt("state",myRocketState);
         }
 
 //		sprintf(buffer, "State: %u \t Alt: %.2f \t Spd: %.2f \t Acc: %.2f\n", myRocketState, rocketdata.agl_altitude, rocketdata.velocity, rocketdata.acceleration);
