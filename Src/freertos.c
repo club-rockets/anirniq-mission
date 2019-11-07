@@ -64,7 +64,7 @@ osTimerId transmitRegHandle;
 
 void StartDefaultTask(void const * argument);
 extern void tsk_canCommunication(void const * argument);
-extern void stk_SD(void const * argument);
+extern void tsk_SD(void const * argument);
 extern void task_acc(void const * argument);
 extern void canTransmitRegCallback(void const * argument);
 
@@ -174,7 +174,7 @@ void MX_FREERTOS_Init(void) {
   app_canCommunicHandle = osThreadCreate(osThread(app_canCommunic), NULL);
 
   /* definition and creation of app_SD */
-  osThreadDef(app_SD, stk_SD, osPriorityNormal, 0, 1000);
+  osThreadDef(app_SD, tsk_SD, osPriorityNormal, 0, 1000);
   app_SDHandle = osThreadCreate(osThread(app_SD), NULL);
 
   /* definition and creation of app_acc */
