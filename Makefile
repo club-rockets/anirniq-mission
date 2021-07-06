@@ -43,19 +43,19 @@ app/app_buzzer.c \
 app/app_ejection.c \
 app/app_usb_serial.c \
 app/app_canCommunication.c \
-../shared/bsp/bsp_can.c \
-../shared/bsp/bsp_can_regdef.c \
-../shared/drivers/barometer/barometer.c \
-../shared/drivers/can/can_driver.c \
-../shared/middleware/kalman/kalman.c \
-../shared/middleware/arm_matrix/arm_mat_add_f32.c \
-../shared/middleware/arm_matrix/arm_mat_cmplx_mult_f32.c \
-../shared/middleware/arm_matrix/arm_mat_init_f32.c \
-../shared/middleware/arm_matrix/arm_mat_inverse_f32.c \
-../shared/middleware/arm_matrix/arm_mat_mult_f32.c \
-../shared/middleware/arm_matrix/arm_mat_scale_f32.c \
-../shared/middleware/arm_matrix/arm_mat_sub_f32.c \
-../shared/middleware/arm_matrix/arm_mat_trans_f32.c \
+shared/bsp/bsp_can.c \
+shared/bsp/bsp_can_regdef.c \
+shared/drivers/barometer/barometer.c \
+shared/drivers/can/can_driver.c \
+shared/middleware/kalman/kalman.c \
+shared/middleware/arm_matrix/arm_mat_add_f32.c \
+shared/middleware/arm_matrix/arm_mat_cmplx_mult_f32.c \
+shared/middleware/arm_matrix/arm_mat_init_f32.c \
+shared/middleware/arm_matrix/arm_mat_inverse_f32.c \
+shared/middleware/arm_matrix/arm_mat_mult_f32.c \
+shared/middleware/arm_matrix/arm_mat_scale_f32.c \
+shared/middleware/arm_matrix/arm_mat_sub_f32.c \
+shared/middleware/arm_matrix/arm_mat_trans_f32.c \
 Src/main.c \
 Src/gpio.c \
 Src/bsp_driver_sd.c \
@@ -127,7 +127,7 @@ startup_stm32f407xx.s
 #######################################
 # binaries
 #######################################
-PREFIX = arm-atollic-eabi-
+PREFIX = arm-none-eabi-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
 ifdef GCC_PATH
@@ -185,11 +185,11 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
--I../shared/drivers \
--I../shared/drivers/can \
--I../shared/middleware \
--I../shared/interfaces \
--I../shared/bsp \
+-Ishared/drivers \
+-Ishared/drivers/can \
+-Ishared/middleware \
+-Ishared/interfaces \
+-Ishared/bsp \
 -IMiddlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -IMiddlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
 
